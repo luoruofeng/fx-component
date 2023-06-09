@@ -1,40 +1,76 @@
 package srv
 
-import "go.uber.org/fx"
+import (
+	"context"
+	"time"
 
-// "log"
-// "net"
+	c "github.com/luoruofeng/fx-component/conf"
+
+	redis "github.com/go-redis/redis/v8"
+	"go.uber.org/fx"
+	"go.uber.org/zap"
+)
+
 // "go.uber.org/fx"
-// "google.golang.org/grpc/reflection"
-// "google.golang.org/grpc"
 
-type GrpcSrv struct {
-	// server *grpc.Server
+type RedisSrv struct {
+	Cli *redis.Client
 }
 
-func NewGrpcSrv(lc fx.Lifecycle) *GrpcSrv {
-	// //举例：
-	// lis, err := net.Listen("tcp", ":50051")
-	// if err != nil {
-	// 	log.Fatalf("failed to listen: %v", err)
+func NewRedisSrv(lc fx.Lifecycle, logger *zap.Logger) RedisSrv {
+	var result RedisSrv = RedisSrv{}
+	// 创建Redis客户端
+	config := c.GetConfig()
+	rdb := redis.NewClient(&redis.Options{
+		Addr:         config.Addr,
+		Password:     config.Password,
+		DB:           config.DbNumber,
+		MaxRetries:   config.MaxRetries,
+		DialTimeout:  time.Duration(config.DialTimeout) * time.Second,
+		ReadTimeout:  time.Duration(config.ReadTimeout) * time.Second,
+		WriteTimeout: time.Duration(config.WriteTimeout) * time.Second,
+	})
+	result.Cli = rdb
+
+	// 设置Redis连接池
+	// rdbOpts := &redis.Options{
+	// 	Addr:     rdbOptions.Addr,
+	// 	Password: rdbOptions.Password,
+	// 	DB:       rdbOptions.DB,
 	// }
-	// s := grpc.NewServer()
+	// rdbOpts.PoolSize = rdbOptions.PoolSize
+	// rdbOpts.MinIdleConns = rdbOptions.MinIdleConns
+	// rdbOpts.IdleTimeout = rdbOptions.IdleTimeout
+	// rdbOpts.MaxConnAge = rdbOptions.MaxConnAge
+	// rdbOpts.ReadTimeout = rdbOptions.ReadTimeout
+	// rdbOpts.WriteTimeout = rdbOptions.WriteTimeout
+	// rdbOpts.MaxRedirects = rdbOptions.MaxRedirects
+	// rdbOpts.MinRetryBackoff = rdbOptions.MinRetryBackoff
+	// rdbOpts.MaxRetryBackoff = rdbOptions.MaxRetryBackoff
+	// rdbOpts.DialTimeout = rdbOptions.DialTimeout
+	// rdbOpts.UseTLS = rdbOptions.UseTLS
+	// rdbOpts.TLSConfig = rdbOptions.TLSConfig
+	// rdbOpts.SkipVerify = rdbOptions.SkipVerify
 
-	// lc.Append(fx.Hook{
-	// 	OnStart: func(ctx context.Context) error {
-	// 		pb.RegisterGreeterServer(s, &server{})
-	// 		reflection.Register(s)
-	// 		if err := s.Serve(lis); err != nil {
-	// 			log.Fatalf("failed to serve: %v", err)
-	// 			return err
-	// 		}
-	// 		return nil
-	// 	},
-	// 	OnStop: func(ctx context.Context) error {
-	// 		return s.Shutdown(ctx)
-	// 	},
-	// })
+	// pool := redis.NewClient(rdbOpts).Pool()
+	// defer pool.Close()
 
-	// return GrpcSrv{server: s}
-	return nil
+	lc.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			logger.Info("Starting Redis client...", zap.Any("rdb", rdb))
+			s := rdb.Ping(ctx)
+			if r, err := s.Result(); err != nil {
+				logger.Error("Redis client start failed", zap.Any("err", err))
+				panic(err)
+			} else {
+				logger.Info("Redis client start success", zap.Any("r", r))
+			}
+			return nil
+		},
+		OnStop: func(ctx context.Context) error {
+			logger.Info("Shutting down Redis client...")
+			return rdb.Close()
+		},
+	})
+	return result
 }
