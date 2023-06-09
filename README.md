@@ -23,7 +23,7 @@ go mod tidy
 
 
 ## fx-tool使用该模块的原理
-当fx-tool add模块fx-tool会自动在一个事务中执行下面1到4步，第5步需要用户手动执行：
+当执行[fx-tool](https://github.com/luoruofeng/fx-tool) add 模块名-版本号。  fx-tool会自动在一个事务中执行下面1到4步，第5步需要用户手动执行：
 下文中的`项目`是指fx-tool创建的项目。
 1. 在项目的*component*文件夹中新增存放该模块代码的文件夹，如:`grpc`。
 2. 从github拉取该分支到*component*文件夹中。
