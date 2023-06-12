@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+  redis_master:
+    image: redis
+    command: redis-server --requirepass luoruofeng
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis_data:/data
+      - ./redis_logs/redis1:/var/log/redis
+    environment:
+      - TZ=Asia/Shanghai
+    networks:
+      - redisnet
+
+  redis_slave1:
+    image: redis
+    command: redis-server --requirepass luoruofeng --slaveof redis_master 6379
+    restart: always
+    ports:
+      - "6380:6379"
+    volumes:
+      - ./redis_data:/data
+      - ./redis_logs/redis2:/var/log/redis
+    environment:
+      - TZ=Asia/Shanghai
+    networks:
+      - redisnet
+
+  redis_slave2:
+    image: redis
+    command: redis-server --requirepass luoruofeng --slaveof redis_master 6379
+    restart: always
+    ports:
+      - "6381:6379"
+    volumes:
+      - ./redis_data:/data
+      - ./redis_logs/redis3:/var/log/redis
+    environment:
+      - TZ=Asia/Shanghai
+    networks:
+      - redisnet
+
+networks:
+  redisnet:
+
+
+# docker run -it --rm --name redis-client --network redis-docker_redisnet redis redis-cli -h redis_master -a luoruofeng
