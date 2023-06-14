@@ -1,0 +1,9 @@
+{
+    "addr":"localhost:6379",
+    "password":"luoruofeng",
+    "db_number":0,
+    "max_retries":3,
+    "dial_timeout": 10,
+    "read_timeout": 10,
+    "write_timeout": 10
+}

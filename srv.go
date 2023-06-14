@@ -1,4 +1,4 @@
-package srv
+package empty
 
 import "go.uber.org/fx"
 
