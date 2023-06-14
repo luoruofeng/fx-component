@@ -8,11 +8,54 @@
 * 每个库的*logic文件夹*用于存放用户需要使用该库的逻辑代码
 * 每个库的*example文件夹*中有该库的使用案例
 
-## 在项目中使用fx-tool中引入该库
+## fx-tool导入库
+1. fx-tool add 当前项目的分支名-版本号。   
+本项目的分支名称皆是：分支名-版本号。（master和empty除外）
 ```shell
-#版本号的缺省值是最新版本，建议不写版本号
-fx-tool add 当前项目的分支名[:版本号]
+# 例如
+fx-tool add redis-1.0.0
 ```
+2. 在项目中的*fx_opt/var.go文件*中找到*ConstructorFuncs*添加*NewXxxSrv*函数，在*fx_opt/var.go*文件中找到*InvokeFuncs*添加函数，函数的参数包含*XxxSrv*结构体。（`NewXxxSrv函数和XxxSrv结构声明于模块中的srv.go文件中`）。  
+这里已*redis-1.0.0*举例说明
+```go
+r "github.com/luo/xxx/component/redis"
+
+var ConstructorFuncs = []interface{}{
+	r.NewRedisSrv,
+}
+
+var InvokeFuncs = []interface{}{
+	func(ts r.RedisSrv) {},
+}
+```
+3. 可以在模块的*logic文件夹*中写代码了。    
+例如：*Abc结构体*需要使用*redisSrv*，可以在NewAbc时候导入参数：(*Abc结构体*已经在fx中注册)
+```go
+r "github.com/luo/xxx/component/redis"
+
+type Abc struct {
+	redisSrv r.RedisSrv
+}
+
+func NewAbc(lc fx.Lifecycle, redisSrv r.RedisSrv) Abc {
+
+	abc := Abc{redisSrv: redisSrv}
+	lc.Append(fx.Hook{
+		OnStart: func(context.Context) error {
+			a.redisSrv.Cli.Set(context.Background(), "abc", "abc", 0)
+			fmt.Println(a.redisSrv.Cli.Get(context.Background(), "abc"))
+			return nil
+		},
+		OnStop: func(ctx context.Context) error {
+			return nil
+		},
+	})
+
+	return abc
+}
+```
+
+<br>
 
 ## 编写一个新的模块
 如果需要新编写一个新的库请从*empty*分支进行拉取，该分支是一个包含了结构的空分支。
