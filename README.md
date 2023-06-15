@@ -46,7 +46,7 @@ func NewAbc(lc fx.Lifecycle, redisSrv r.RedisSrv) Abc {
 	lc.Append(fx.Hook{
 		OnStart: func(context.Context) error {
 			abc.redisSrv.Cli.Set(context.Background(), "abc", "abc", 0)
-			fmt.Println(a.redisSrv.Cli.Get(context.Background(), "abc"))
+			fmt.Println(abc.redisSrv.Cli.Get(context.Background(), "abc"))
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
