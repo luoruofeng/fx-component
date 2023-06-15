@@ -21,7 +21,7 @@ fx-tool add redis-1.0.0
 2. 在项目中的*fx_opt/var.go文件*中找到*ConstructorFuncs*添加*NewXxxSrv*函数，在*fx_opt/var.go*文件中找到*InvokeFuncs*添加函数，函数的参数包含*XxxSrv*结构体。（`NewXxxSrv函数和XxxSrv结构声明于模块中的srv.go文件中`）。  
 这里已*redis-1.0.0*举例说明
 ```go
-r "github.com/luo/xxx/component/redis"
+r "github.com/xxxx/xxx/component/redis" //这是你github.com/xxxx/xxx是项目的mod名称
 
 var ConstructorFuncs = []interface{}{
 	r.NewRedisSrv,
@@ -34,7 +34,7 @@ var InvokeFuncs = []interface{}{
 3. 可以在模块的*logic文件夹*中写代码了。    
 例如：*Abc结构体*需要使用*redisSrv*，可以在NewAbc时候导入参数：(*Abc结构体*已经在fx中注册)
 ```go
-r "github.com/luo/xxx/component/redis"
+r "github.com/xxx/xxx/component/redis"
 
 type Abc struct {
 	redisSrv r.RedisSrv
@@ -45,7 +45,7 @@ func NewAbc(lc fx.Lifecycle, redisSrv r.RedisSrv) Abc {
 	abc := Abc{redisSrv: redisSrv}
 	lc.Append(fx.Hook{
 		OnStart: func(context.Context) error {
-			a.redisSrv.Cli.Set(context.Background(), "abc", "abc", 0)
+			abc.redisSrv.Cli.Set(context.Background(), "abc", "abc", 0)
 			fmt.Println(a.redisSrv.Cli.Get(context.Background(), "abc"))
 			return nil
 		},
