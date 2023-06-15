@@ -21,7 +21,7 @@ fx-tool add redis-1.0.0
 2. 在项目中的*fx_opt/var.go文件*中找到*ConstructorFuncs*添加*NewXxxSrv*函数，在*fx_opt/var.go*文件中找到*InvokeFuncs*添加函数，函数的参数包含*XxxSrv*结构体。（`NewXxxSrv函数和XxxSrv结构声明于模块中的srv.go文件中`）。  
 这里已*redis-1.0.0*举例说明
 ```go
-r "github.com/xxxx/xxx/component/redis" //这是你github.com/xxxx/xxx是项目的mod名称
+r "github.com/xxxx/xxx/component/redis" //github.com/xxxx/xxx是你创建的项目的mod名称，参考go.mod文件夹第一行
 
 var ConstructorFuncs = []interface{}{
 	r.NewRedisSrv,
