@@ -1,9 +1,9 @@
 {
-    "addr":"localhost:6379",
-    "password":"luoruofeng",
-    "db_number":0,
-    "max_retries":3,
-    "dial_timeout": 10,
-    "read_timeout": 10,
-    "write_timeout": 10
+    "addr":"mongodb://admin:luoruofeng@localhost:27017/testdb",
+    "db_name":"testdb",
+    "password":"ruofeng",
+    "username":"luo",
+    "connect_timeout":15,
+    "server_selection_timeout": 60,
+    "socket_timeout": 60
 }

@@ -15,11 +15,11 @@ func GetConfig() *Config {
 }
 
 type Config struct {
-	Addr         string `json:"addr"`
-	Password     string `json:"password"`
-	DbNumber     int    `json:"db_number"`
-	MaxRetries   int    `json:"max_retries"`
-	DialTimeout  int    `json:"dial_timeout"`
-	ReadTimeout  int    `json:"read_timeout"`
-	WriteTimeout int    `json:"write_timeout"`
+	Addr                   string `json:"addr"`
+	DbName                 string `json:"db_name"`
+	Username               string `json:"username"`
+	Password               string `json:"password"`
+	ConnectTimeout         int    `json:"connect_timeout"`
+	SocketTimeout          int    `json:"socket_timeout"`
+	ServerSelectionTimeout int    `json:"server_selection_timeout"`
 }
