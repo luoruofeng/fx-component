@@ -12,7 +12,7 @@ fx-tool init -url="github.com/luoruofeng/xxxproj" redis-1.0.0
 ```
 
 ## 若项目已存在，添加模块
-1. 项目根目录执行
+1. 项目根目录执行，修改*componen/conf/config.json*配置文件
 ```shell
 fx-tool add redis-1.0.0
 ```
@@ -56,5 +56,7 @@ func NewAbc(lc fx.Lifecycle, redisSrv r.RedisSrv) Abc {
 	return abc
 }
 ```
+
+4. 可以将一些逻辑模块封装到*component/logic/*文件夹中。
 
 <br>
