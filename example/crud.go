@@ -70,6 +70,9 @@ func (crud Crud) Run() {
 func main() {
 	fx.New(
 		fx.Provide(
+			func() map[string]string {
+				return make(map[string]string)
+			},
 			zap.NewExample,
 			m.NewMongoSrv,
 			NewCrud,

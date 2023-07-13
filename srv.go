@@ -2,7 +2,8 @@ package mongo
 
 import (
 	"context"
-	"fmt"
+	"os"
+	"strconv"
 	"time"
 
 	c "github.com/luoruofeng/fx-component/conf"
@@ -19,15 +20,56 @@ type MongoSrv struct {
 	Db  *mongo.Database
 }
 
-func NewMongoSrv(lc fx.Lifecycle, log *zap.Logger) MongoSrv {
-	conf := c.GetConfig()
-	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
+func NewMongoSrv(lc fx.Lifecycle, log *zap.Logger, configPathMap map[string]string) MongoSrv {
+	var conf *c.Config
+	if configPathMap == nil {
+		conf = c.GetConfig(log, "")
+
+	}
+	conf = c.GetConfig(log, configPathMap["mongo-config"])
 	opts := options.Client()
-	opts = opts.ApplyURI(conf.Addr)
+	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
 	opts = opts.SetServerAPIOptions(serverAPI)
+
+	if v := os.Getenv("MONGO_ADDR"); v != "" {
+		conf.Addr = v
+		log.Info("环境变量MONGO_ADDR已设置", zap.String("MONGO_ADDR", conf.Addr))
+	}
+	opts = opts.ApplyURI(conf.Addr)
+
+	if v := os.Getenv("MONGO_CONNECT_TIMEOUT"); v != "" {
+		if r, err := strconv.Atoi(v); err == nil {
+			log.Info("环境变量MONGO_CONNECT_TIMEOUT已设置", zap.Int("MONGO_CONNECT_TIMEOUT", r))
+			conf.ConnectTimeout = r
+		}
+	}
 	opts = opts.SetConnectTimeout(time.Duration(conf.ConnectTimeout) * time.Second)
+
+	if v := os.Getenv("MONGO_SERVER_SELECTION_TIMEOUT"); v != "" {
+		if r, err := strconv.Atoi(v); err == nil {
+			log.Info("环境变量MONGO_SERVER_SELECTION_TIMEOUT已设置", zap.Int("MONGO_SERVER_SELECTION_TIMEOUT", r))
+			conf.ServerSelectionTimeout = r
+		}
+	}
 	opts = opts.SetServerSelectionTimeout(time.Duration(conf.ServerSelectionTimeout) * time.Second)
+
+	if v := os.Getenv("MONGO_SOCKET_TIMEOUT"); v != "" {
+		if r, err := strconv.Atoi(v); err == nil {
+			log.Info("环境变量MONGO_SOCKET_TIMEOUT已设置", zap.Int("MONGO_SOCKET_TIMEOUT", r))
+			conf.SocketTimeout = r
+		}
+	}
 	opts = opts.SetSocketTimeout(time.Duration(conf.SocketTimeout) * time.Second)
+
+	if v := os.Getenv("MONGO_USER_NAME"); v != "" {
+		conf.Username = v
+		log.Info("环境变量MONGO_USER_NAME已设置", zap.String("MONGO_USER_NAME", conf.Username))
+	}
+	if v := os.Getenv("MONGO_PASSWORD"); v != "" {
+		conf.Password = v
+		log.Info("环境变量MONGO_PASSWORD已设置", zap.String("MONGO_PASSWORD", conf.Password))
+	}
+
 	credential := options.Credential{
 		Username: conf.Username,
 		Password: conf.Password,
@@ -48,7 +90,7 @@ func NewMongoSrv(lc fx.Lifecycle, log *zap.Logger) MongoSrv {
 				log.Error("mongo client ping error", zap.Error(err))
 				panic(err)
 			}
-			fmt.Println("已经成功连接MongoDB!")
+			log.Info("已经成功连接MongoDB!")
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {

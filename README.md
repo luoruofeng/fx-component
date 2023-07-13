@@ -59,3 +59,36 @@ func NewAbc(lc fx.Lifecycle, mongoSrv r.MongoSrv) Abc {
 4. 可以将一些模块封装到*component/logic*文件夹中。
 
 <br>
+
+## 关于配置
+ mongo的配置按优先级来源于以下三个方面。
+
+1. 环境变量。
+2. 运行项目时的指定文件。
+3. 编译前的配置文件conf/config.json。
+
+环境变量设置参考：
+```
+	"MONGO_ADDR"
+	"MONGO_CONNECT_TIMEOUT"
+	"MONGO_SERVER_SELECTION_TIMEOUT"
+	"MONGO_SOCKET_TIMEOUT"
+	"MONGO_USER_NAME"
+	"MONGO_PASSWORD"
+```
+
+如需要运行项目时的指定文件需要修改项目的cmd/config.go:
+```
+func GetConfigFilePath() map[string]string {
+	ConfigFilePathMap = make(map[string]string)
+	mongoConfigPath := flag.String("mongo-config", "", "mongo配置json文件")
+	flag.Parse()
+	ConfigFilePathMap["mongo-config"] = *mongoConfigPath
+	return ConfigFilePathMap
+}
+```
+
+运行项目时的指定文件方法如下
+```
+	go run . -cnf="xxx/xxx.json" -mongo-config="xxx/MongoCnf.json"
+```
